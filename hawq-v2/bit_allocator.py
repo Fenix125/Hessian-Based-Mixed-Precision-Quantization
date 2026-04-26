@@ -65,17 +65,29 @@ class HAWQv2BitAllocator:
     # ------------------------------------------------------------------ #
     def allocate_by_budget(self, layer_sensitivities, target_avg_bits):
         """
-        Greedy parameter-weighted budget allocation.
+        Pass-based parameter-weighted budget allocation.
 
         Strategy
         --------
-        1. Start every layer at the minimum bit-width.
-        2. While we are below target average, find the most-sensitive
-           layer that has room to grow and bump it to the next higher
-           bit-width.
-        3. Stop when the next promotion would overshoot. If the overshoot
-           is closer to the target than staying put, take that promotion
-           anyway (round-to-nearest behavior).
+        Walk the candidate bit-widths in *passes*:
+            pass 0: promote layers from level 0 (min) to level 1
+            pass 1: promote layers from level 1 to level 2
+            ...
+        Within each pass, promote in sensitivity order (highest first).
+
+        Why passes (instead of "promote one layer all the way up")
+        ----------------------------------------------------------
+        Depth-first promotion (one layer all the way up before touching the
+        next) blows up at intermediate budgets. e.g. with candidates
+        {6, 8, 10} and budget 8 the depth-first version ends up with the
+        top half of layers at 10 and the bottom half at 6 - the half stuck
+        at 6 hurts more than the half at 10 helps, and the result loses
+        to Uniform-8 (everyone at 8). The breadth-first pass-based version
+        gracefully reduces to "everyone at 8" at budget 8, and only starts
+        promoting to 10 once budget exceeds 8.
+
+        Round-to-nearest at the boundary: if the next promotion overshoots
+        the target by less than the current undershoot, accept it.
 
         Returns a dict layer_name -> bit_width.
         """
@@ -106,32 +118,27 @@ class HAWQv2BitAllocator:
                 / total_params
             )
 
-        # Greedy promotion loop.
-        while True:
-            # Pick the highest-sensitivity layer that still has room.
-            promote = None
+        # Walk one pass per adjacent pair of bit-widths.
+        for level_idx in range(len(bits_asc) - 1):
+            cur_bit = bits_asc[level_idx]
+            next_bit = bits_asc[level_idx + 1]
+
             for name in layer_names:
-                if allocated[name] < max_bit:
-                    promote = name
-                    break
-            if promote is None:
-                break
+                if allocated[name] != cur_bit:
+                    continue  # already promoted in an earlier pass
 
-            cur = allocated[promote]
-            next_bit = bits_asc[bits_asc.index(cur) + 1]
+                tentative = dict(allocated)
+                tentative[name] = next_bit
+                new_avg = weighted_avg(tentative)
+                cur_avg = weighted_avg(allocated)
 
-            tentative = dict(allocated)
-            tentative[promote] = next_bit
-            new_avg = weighted_avg(tentative)
-            cur_avg = weighted_avg(allocated)
+                if new_avg <= target_avg_bits:
+                    allocated = tentative
+                    continue
 
-            if new_avg <= target_avg_bits:
-                allocated = tentative
-                continue
-
-            # Crossing the target. Pick whichever side is closer.
-            if abs(new_avg - target_avg_bits) < abs(cur_avg - target_avg_bits):
-                allocated = tentative
-            break
+                # Crossing the target. Pick whichever side is closer.
+                if abs(new_avg - target_avg_bits) < abs(cur_avg - target_avg_bits):
+                    allocated = tentative
+                return allocated
 
         return allocated
