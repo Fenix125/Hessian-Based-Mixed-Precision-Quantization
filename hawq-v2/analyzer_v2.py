@@ -22,8 +22,36 @@ sharp curvature and need more bits; layers with low S_i are flat and can be
 compressed harder.
 """
 
+import contextlib
+
 import torch
 import torch.nn as nn
+
+
+def _math_attention_ctx():
+    """
+    Context manager that forces PyTorch's math SDPA backend.
+
+    Why: the default (and the flash / mem-efficient) attention kernels do not
+    implement double-backward, but Hutchinson's trace needs second-order
+    autograd. Forcing the math kernel sidesteps the
+    ``derivative for aten::_scaled_dot_product_efficient_attention_backward
+    is not implemented`` error on transformers loaded without
+    ``attn_implementation='eager'``.
+    """
+    # Newer torch (>=2.3): torch.nn.attention.sdpa_kernel
+    try:
+        from torch.nn.attention import SDPBackend, sdpa_kernel
+        return sdpa_kernel(SDPBackend.MATH)
+    except Exception:
+        pass
+    # Older torch fallback: backends.cuda.sdp_kernel
+    try:
+        return torch.backends.cuda.sdp_kernel(
+            enable_flash=False, enable_mem_efficient=False, enable_math=True
+        )
+    except Exception:
+        return contextlib.nullcontext()
 
 
 class ViTHAWQv2Analyzer:
@@ -126,32 +154,34 @@ class ViTHAWQv2Analyzer:
         inputs = inputs.to(self.device)
         targets = targets.to(self.device)
 
-        outputs = self.model(inputs)
-        if hasattr(outputs, "logits"):
-            loss = self.criterion(outputs.logits, targets)
-        else:
-            loss = self.criterion(outputs, targets)
+        # Force math SDPA so the backward graph supports double-backward.
+        with _math_attention_ctx():
+            outputs = self.model(inputs)
+            if hasattr(outputs, "logits"):
+                loss = self.criterion(outputs.logits, targets)
+            else:
+                loss = self.criterion(outputs, targets)
 
-        weight = layer_module.weight
-        if weight is None:
-            return 0.0
+            weight = layer_module.weight
+            if weight is None:
+                return 0.0
 
-        g = torch.autograd.grad(
-            loss, weight, create_graph=True, retain_graph=True
-        )[0]
-
-        if g.norm().item() < 1e-12:
-            return 0.0
-
-        trace_estimates = []
-        for s in range(num_samples):
-            v = self._sample_rademacher(weight)
-            gv = (g * v).sum()
-            Hv = torch.autograd.grad(
-                gv, weight, retain_graph=(s < num_samples - 1)
+            g = torch.autograd.grad(
+                loss, weight, create_graph=True, retain_graph=True
             )[0]
-            vHv = (v * Hv).sum().item()
-            trace_estimates.append(vHv)
+
+            if g.norm().item() < 1e-12:
+                return 0.0
+
+            trace_estimates = []
+            for s in range(num_samples):
+                v = self._sample_rademacher(weight)
+                gv = (g * v).sum()
+                Hv = torch.autograd.grad(
+                    gv, weight, retain_graph=(s < num_samples - 1)
+                )[0]
+                vHv = (v * Hv).sum().item()
+                trace_estimates.append(vHv)
 
         return float(sum(trace_estimates) / len(trace_estimates))
 
