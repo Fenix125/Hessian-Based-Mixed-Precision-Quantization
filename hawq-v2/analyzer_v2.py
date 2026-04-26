@@ -272,6 +272,11 @@ class ViTHAWQv2Analyzer:
                     f"n_i = {n_i} | S_i = {s_i:.4e}"
                 )
 
+            # Defrag GPU memory between layers - the second-order autograd
+            # graph leaves a lot of fragmented allocations behind.
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+
         if sort_desc:
             sensitivities = dict(
                 sorted(
