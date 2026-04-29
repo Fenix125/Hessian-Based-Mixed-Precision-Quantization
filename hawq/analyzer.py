@@ -268,7 +268,7 @@ class ViTHAWQAnalyzer:
             if not hasattr(layer_module, "weight") or layer_module.weight is None:
                 raise ValueError(f"Layer {layer_name} has no weight tensor")
 
-            target_bits = int(allocated_bits[layer_name])
+            target_bits = int(allocated_bits[layer_name]["weight_bits"])
             lambda_1 = float(metrics["lambda_1"])
 
             l2_error = self.simulate_quantization_error(

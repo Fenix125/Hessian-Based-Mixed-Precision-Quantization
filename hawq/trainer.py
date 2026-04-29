@@ -188,11 +188,13 @@ class HAWQTrainer:
         named_modules = dict(self.model.named_modules())
 
         for phase_idx, (block_name, block_info) in enumerate(schedule, start=1):
-            weight_bits = block_info["target_bits"]
 
-            print(f"\n[Phase {phase_idx}] Quantize + fine-tune: {block_name} at {weight_bits}-bit")
+            w_bits = allocated_bits[block_name]["weight_bits"]
+            a_bits = allocated_bits[block_name]["act_bits"]
 
-            self.enable_block_quantization(block_name, weight_bits)
+            print(f"\n[Phase {phase_idx}] Quantize + fine-tune: {block_name} (W{w_bits}A{a_bits})")
+
+            self.enable_block_quantization(block_name, weight_bits=w_bits, act_bits=a_bits)
 
             self.freeze_all()
 
