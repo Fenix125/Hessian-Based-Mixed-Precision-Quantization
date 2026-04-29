@@ -18,8 +18,9 @@ class HAWQBitAllocator:
 
     def allocate_by_rank(self, layer_sensitivities):
         """
-        Simple baseline:
-        higher S_i -> higher precision
+        Dynamic baseline allocator
+        Mathematically maps the continuous sensitivity rank onto an arbitrary 
+        discrete set of candidate bit-widths.
         """
         sorted_layers = sorted(
             layer_sensitivities.items(),
@@ -28,19 +29,19 @@ class HAWQBitAllocator:
         )
 
         bits_desc = sorted(self.candidate_weight_bits, reverse=True)
+        num_candidates = len(bits_desc)
         n = len(sorted_layers)
 
         allocated = {}
         for rank, (name, _) in enumerate(sorted_layers):
+            #calculates the fractional depth of this layer in the sensitivity hierarchy
             frac = rank / max(n - 1, 1)
-
-            if frac < 1/3:
-                bit = bits_desc[0]
-            elif frac < 2/3:
-                bit = bits_desc[min(1, len(bits_desc)-1)]
-            else:
-                bit = bits_desc[min(2, len(bits_desc)-1)]
-
-            allocated[name] = bit
+            
+            #the index based on the number of available bit-widths
+            bin_idx = int(frac * num_candidates)
+            
+            bin_idx = min(bin_idx, num_candidates - 1) #prevents index out of bounds for the absolute lowest rank
+            
+            allocated[name] = bits_desc[bin_idx]
 
         return allocated
