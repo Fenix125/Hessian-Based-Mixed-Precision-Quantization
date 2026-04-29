@@ -196,6 +196,8 @@ class HAWQTrainer:
 
             self.freeze_all()
 
+            self.unfreeze_norm_layers()
+            
             #always unfreezes current block
             self.unfreeze_module(named_modules[block_name])
 
@@ -258,3 +260,13 @@ class HAWQTrainer:
                 f"train_loss={train_loss:.6f} | "
                 + " ".join(f"{k}={v:.6f}" for k, v in metrics.items())
             )
+
+    def unfreeze_norm_layers(self):
+        """
+        Unfreeze all normalization layers (LayerNorm in ViTs).
+        This is mathematically critical to absorb quantization variance shift.
+        """
+        for module in self.model.modules():
+            if isinstance(module, (nn.LayerNorm, nn.BatchNorm1d, nn.BatchNorm2d, nn.BatchNorm3d)):
+                for p in module.parameters():
+                    p.requires_grad_(True)
