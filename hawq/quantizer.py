@@ -6,6 +6,7 @@ import torch.nn.functional as F
 class FakeQuantizer(nn.Module):
     """
     Simulates uniform symmetric quantization during training.
+    Includes Exponential Moving Average (EMA) for dynamic activation ranges.
 
     Important idea:
     ----------------
@@ -38,7 +39,7 @@ class FakeQuantizer(nn.Module):
     eps : float
         Small positive value to avoid division by zero in scale computation.
     """
-    def __init__(self, bit_width=8, enabled=False, per_channel=False, channel_axis=0, eps=1e-8):
+    def __init__(self, bit_width=8, enabled=False, per_channel=False, channel_axis=0, eps=1e-8, is_activation=False, momentum=0.1):
         super().__init__()
         self.bit_width = bit_width
         self.enabled = enabled
@@ -46,6 +47,11 @@ class FakeQuantizer(nn.Module):
         #the dimension considered as the channel dimension in per-channel mode.
         self.channel_axis = channel_axis
         self.eps = eps
+
+        self.is_activation = is_activation
+        self.momentum = momentum
+        
+        self.register_buffer('running_max_val', torch.tensor(0.0))
 
     def set_enabled(self, enabled: bool):
         """
@@ -89,26 +95,37 @@ class FakeQuantizer(nn.Module):
         if not self.enabled:
             return x
 
-
-        # Symmetric signed quantization range.
-        # Example:
-        #   8-bit -> qmax = 127, qmin = -127
-        #   4-bit -> qmax = 7,   qmin = -7
         qmax = (2 ** (self.bit_width - 1)) - 1
         qmin = -qmax
 
+        #maximum value based on tensor type
         if self.per_channel:
             reduce_dims = tuple(d for d in range(x.ndim) if d != self.channel_axis)
-            max_val = x.abs().amax(dim=reduce_dims, keepdim=True)
+            current_max_val = x.abs().amax(dim=reduce_dims, keepdim=True)
         else:
-            max_val = x.abs().amax()
+            current_max_val = x.abs().amax()
 
+        #EMA tracking for activations, absolute static for weights
+        if self.is_activation:
+            if self.training:
+                if self.running_max_val.item() == 0.0:
+                    self.running_max_val.copy_(current_max_val.detach())
+                else:
+                    #smoothing out the dynamic range updates
+                    self.running_max_val.mul_(1 - self.momentum).add_(current_max_val.detach() * self.momentum)
+                
+                max_val = self.running_max_val
+            else:
+                max_val = self.running_max_val
+        else:
+            max_val = current_max_val
+
+        #quantizing and project
         scale = torch.clamp(max_val / max(qmax, 1), min=self.eps)
         q = torch.round(x / scale)
         q = torch.clamp(q, qmin, qmax)
         x_q = q * scale
 
-        #STE
         return x + (x_q - x).detach()
 
 
@@ -139,9 +156,10 @@ class QLinear(nn.Module):
         #if original layer has bias
         self.bias = nn.Parameter(linear.bias.detach().clone()) if linear.bias is not None else None
 
-        self.weight_quant = FakeQuantizer(bit_width=8, enabled=False, per_channel=False)
-        self.act_quant = FakeQuantizer(bit_width=8, enabled=False, per_channel=False)
+        self.weight_quant = FakeQuantizer(bit_width=8, enabled=False, per_channel=False, is_activation=False)
+        self.act_quant = FakeQuantizer(bit_width=8, enabled=False, per_channel=False, is_activation=True)
 
+        
     def set_weight_quant(self, enabled: bool, bit_width: int):
         """
         Enable/disable weight quantization and set its precision.
