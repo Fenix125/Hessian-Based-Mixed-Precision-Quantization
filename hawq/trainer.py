@@ -54,11 +54,27 @@ class HAWQTrainer:
 
     def build_optimizer(self):
         """
-        Build AdamW optimizer using only currently trainable parameters.
+        Builds AdamW optimizer with differential learning rates.
+        Accelerates the convergence of the randomly initialized head.
         """
-        params = [p for p in self.model.parameters() if p.requires_grad]
-        return torch.optim.AdamW(params, lr=self.lr, weight_decay=self.weight_decay)
-
+        head_params = []
+        body_params = []
+        
+        for name, p in self.model.named_parameters():
+            if not p.requires_grad:
+                continue
+            if "classifier" in name.lower() or "head" in name.lower():
+                head_params.append(p)
+            else:
+                body_params.append(p)
+                
+        #the head needs to travel far, the body only needs to adapt to the blur
+        optim_groups = [
+            {"params": body_params, "lr": self.lr},          
+            {"params": head_params, "lr": self.lr * 100.0}   
+        ]
+        
+        return torch.optim.AdamW(optim_groups, weight_decay=self.weight_decay)
     def forward_loss(self, batch):
         """
         Runs one forward pass and compute loss.
