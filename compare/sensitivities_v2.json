@@ -1,0 +1,362 @@
+{
+  "vit.encoder.layer.0.output.dense": {
+    "trace": 24.22488360106945,
+    "parameters": 589824,
+    "S_i": 4.107137654803713e-05
+  },
+  "vit.encoder.layer.1.attention.output.dense": {
+    "trace": 5.705947682261467,
+    "parameters": 147456,
+    "S_i": 3.869593426012822e-05
+  },
+  "vit.encoder.layer.2.attention.attention.value": {
+    "trace": 5.396091774106026,
+    "parameters": 147456,
+    "S_i": 3.6594589396877884e-05
+  },
+  "vit.encoder.layer.0.intermediate.dense": {
+    "trace": 20.582114100456238,
+    "parameters": 589824,
+    "S_i": 3.489534861324096e-05
+  },
+  "vit.encoder.layer.0.attention.attention.value": {
+    "trace": 4.3859382681548595,
+    "parameters": 147456,
+    "S_i": 2.9744047499965138e-05
+  },
+  "vit.encoder.layer.1.attention.attention.value": {
+    "trace": 4.2900670655071735,
+    "parameters": 147456,
+    "S_i": 2.909387929624548e-05
+  },
+  "vit.encoder.layer.2.attention.output.dense": {
+    "trace": 4.066251091659069,
+    "parameters": 147456,
+    "S_i": 2.7576030081238263e-05
+  },
+  "vit.encoder.layer.9.attention.output.dense": {
+    "trace": 4.046618364751339,
+    "parameters": 147456,
+    "S_i": 2.7442887130746385e-05
+  },
+  "vit.encoder.layer.10.attention.output.dense": {
+    "trace": 3.611195333302021,
+    "parameters": 147456,
+    "S_i": 2.4489985713039965e-05
+  },
+  "vit.encoder.layer.0.attention.output.dense": {
+    "trace": 3.576651506125927,
+    "parameters": 147456,
+    "S_i": 2.4255720392021532e-05
+  },
+  "vit.encoder.layer.10.attention.attention.value": {
+    "trace": 3.3114411756396294,
+    "parameters": 147456,
+    "S_i": 2.2457147729760942e-05
+  },
+  "vit.encoder.layer.9.attention.attention.value": {
+    "trace": 2.7581257689744234,
+    "parameters": 147456,
+    "S_i": 1.870473747405615e-05
+  },
+  "vit.encoder.layer.2.intermediate.dense": {
+    "trace": 9.348060801625252,
+    "parameters": 589824,
+    "S_i": 1.5848898657269376e-05
+  },
+  "vit.encoder.layer.1.intermediate.dense": {
+    "trace": 9.005039379000664,
+    "parameters": 589824,
+    "S_i": 1.526733293151968e-05
+  },
+  "vit.encoder.layer.3.attention.attention.value": {
+    "trace": 2.1630326034501195,
+    "parameters": 147456,
+    "S_i": 1.466900365838026e-05
+  },
+  "vit.encoder.layer.6.attention.attention.value": {
+    "trace": 2.1202268917113543,
+    "parameters": 147456,
+    "S_i": 1.4378708846783815e-05
+  },
+  "vit.encoder.layer.11.attention.output.dense": {
+    "trace": 1.9861778523772955,
+    "parameters": 147456,
+    "S_i": 1.3469630617793075e-05
+  },
+  "vit.encoder.layer.11.attention.attention.value": {
+    "trace": 1.9015041906386614,
+    "parameters": 147456,
+    "S_i": 1.289540059840672e-05
+  },
+  "vit.encoder.layer.8.attention.attention.value": {
+    "trace": 1.8020956255495548,
+    "parameters": 147456,
+    "S_i": 1.2221243120317618e-05
+  },
+  "vit.encoder.layer.8.attention.output.dense": {
+    "trace": 1.7421323023736477,
+    "parameters": 147456,
+    "S_i": 1.1814590809283092e-05
+  },
+  "vit.encoder.layer.4.attention.attention.value": {
+    "trace": 1.6685847090557218,
+    "parameters": 147456,
+    "S_i": 1.1315814270397419e-05
+  },
+  "vit.encoder.layer.7.attention.output.dense": {
+    "trace": 1.528561582788825,
+    "parameters": 147456,
+    "S_i": 1.0366221671473693e-05
+  },
+  "vit.encoder.layer.5.intermediate.dense": {
+    "trace": 5.948024690151215,
+    "parameters": 589824,
+    "S_i": 1.0084406009506589e-05
+  },
+  "vit.encoder.layer.7.attention.attention.value": {
+    "trace": 1.4451782368123531,
+    "parameters": 147456,
+    "S_i": 9.800742165882386e-06
+  },
+  "vit.encoder.layer.3.attention.output.dense": {
+    "trace": 1.4337715692818165,
+    "parameters": 147456,
+    "S_i": 9.723385750880374e-06
+  },
+  "vit.encoder.layer.6.attention.output.dense": {
+    "trace": 1.3797919624485075,
+    "parameters": 147456,
+    "S_i": 9.357313113393198e-06
+  },
+  "vit.encoder.layer.1.output.dense": {
+    "trace": 5.295062839984894,
+    "parameters": 589824,
+    "S_i": 8.977360772001299e-06
+  },
+  "vit.encoder.layer.5.attention.attention.value": {
+    "trace": 1.3036835845559835,
+    "parameters": 147456,
+    "S_i": 8.841170142659394e-06
+  },
+  "vit.encoder.layer.10.intermediate.dense": {
+    "trace": 5.166773684322834,
+    "parameters": 589824,
+    "S_i": 8.759856642528677e-06
+  },
+  "vit.encoder.layer.11.output.dense": {
+    "trace": 4.664587765932083,
+    "parameters": 589824,
+    "S_i": 7.90844008709731e-06
+  },
+  "vit.encoder.layer.9.intermediate.dense": {
+    "trace": 4.4354284554719925,
+    "parameters": 589824,
+    "S_i": 7.519918578206368e-06
+  },
+  "vit.encoder.layer.9.attention.attention.key": {
+    "trace": 1.0978333153761923,
+    "parameters": 147456,
+    "S_i": 7.445158660049047e-06
+  },
+  "vit.encoder.layer.9.output.dense": {
+    "trace": 4.231069020926952,
+    "parameters": 589824,
+    "S_i": 7.173443299911418e-06
+  },
+  "vit.encoder.layer.10.attention.attention.key": {
+    "trace": 0.9777570231817663,
+    "parameters": 147456,
+    "S_i": 6.63083918715933e-06
+  },
+  "vit.encoder.layer.10.attention.attention.query": {
+    "trace": 0.9477854059077799,
+    "parameters": 147456,
+    "S_i": 6.427581149005669e-06
+  },
+  "vit.encoder.layer.6.intermediate.dense": {
+    "trace": 3.706436797976494,
+    "parameters": 589824,
+    "S_i": 6.283970808201249e-06
+  },
+  "vit.encoder.layer.11.attention.attention.key": {
+    "trace": 0.8774955440312624,
+    "parameters": 147456,
+    "S_i": 5.950897515402984e-06
+  },
+  "vit.encoder.layer.5.attention.output.dense": {
+    "trace": 0.8008852787315845,
+    "parameters": 147456,
+    "S_i": 5.43135090285634e-06
+  },
+  "vit.encoder.layer.4.attention.output.dense": {
+    "trace": 0.768313898704946,
+    "parameters": 147456,
+    "S_i": 5.210462095167006e-06
+  },
+  "vit.encoder.layer.3.intermediate.dense": {
+    "trace": 2.9587253853678703,
+    "parameters": 589824,
+    "S_i": 5.016285172132484e-06
+  },
+  "vit.encoder.layer.9.attention.attention.query": {
+    "trace": 0.726603927090764,
+    "parameters": 147456,
+    "S_i": 4.927598246872043e-06
+  },
+  "vit.encoder.layer.4.intermediate.dense": {
+    "trace": 2.567474603652954,
+    "parameters": 589824,
+    "S_i": 4.35295037782958e-06
+  },
+  "vit.encoder.layer.2.attention.attention.query": {
+    "trace": 0.5471829809248447,
+    "parameters": 147456,
+    "S_i": 3.7108220820098522e-06
+  },
+  "vit.encoder.layer.10.output.dense": {
+    "trace": 2.1745506208389997,
+    "parameters": 589824,
+    "S_i": 3.686778803234524e-06
+  },
+  "vit.encoder.layer.3.attention.attention.key": {
+    "trace": 0.5115820718929172,
+    "parameters": 147456,
+    "S_i": 3.469387965853659e-06
+  },
+  "vit.encoder.layer.2.attention.attention.key": {
+    "trace": 0.511500254040584,
+    "parameters": 147456,
+    "S_i": 3.468833103031304e-06
+  },
+  "vit.encoder.layer.11.intermediate.dense": {
+    "trace": 1.9959204494953156,
+    "parameters": 589824,
+    "S_i": 3.383925458264356e-06
+  },
+  "vit.encoder.layer.1.attention.attention.query": {
+    "trace": 0.48314605513587594,
+    "parameters": 147456,
+    "S_i": 3.2765438851988115e-06
+  },
+  "vit.encoder.layer.11.attention.attention.query": {
+    "trace": 0.4775332035496831,
+    "parameters": 147456,
+    "S_i": 3.2384792992464404e-06
+  },
+  "vit.encoder.layer.8.attention.attention.key": {
+    "trace": 0.46807014057412744,
+    "parameters": 147456,
+    "S_i": 3.1743037962112594e-06
+  },
+  "vit.encoder.layer.3.attention.attention.query": {
+    "trace": 0.46103559783659875,
+    "parameters": 147456,
+    "S_i": 3.1265977500854406e-06
+  },
+  "vit.encoder.layer.8.intermediate.dense": {
+    "trace": 1.7690731324255466,
+    "parameters": 589824,
+    "S_i": 2.999323751535283e-06
+  },
+  "vit.encoder.layer.8.attention.attention.query": {
+    "trace": 0.3614111834904179,
+    "parameters": 147456,
+    "S_i": 2.450976450537231e-06
+  },
+  "vit.encoder.layer.4.output.dense": {
+    "trace": 1.417153119109571,
+    "parameters": 589824,
+    "S_i": 2.4026711681952092e-06
+  },
+  "vit.encoder.layer.1.attention.attention.key": {
+    "trace": 0.3406199333257973,
+    "parameters": 147456,
+    "S_i": 2.3099767613782915e-06
+  },
+  "vit.encoder.layer.0.attention.attention.key": {
+    "trace": 0.327047630911693,
+    "parameters": 147456,
+    "S_i": 2.2179336948763903e-06
+  },
+  "vit.encoder.layer.8.output.dense": {
+    "trace": 1.2100354311987758,
+    "parameters": 589824,
+    "S_i": 2.0515194892014833e-06
+  },
+  "vit.encoder.layer.6.attention.attention.query": {
+    "trace": 0.27416502905543894,
+    "parameters": 147456,
+    "S_i": 1.8593005985205007e-06
+  },
+  "vit.encoder.layer.2.output.dense": {
+    "trace": 1.0610076487064362,
+    "parameters": 589824,
+    "S_i": 1.7988546561456233e-06
+  },
+  "vit.encoder.layer.6.attention.attention.key": {
+    "trace": 0.22536380751989782,
+    "parameters": 147456,
+    "S_i": 1.5283461338968764e-06
+  },
+  "vit.encoder.layer.6.output.dense": {
+    "trace": 0.869974457193166,
+    "parameters": 589824,
+    "S_i": 1.474972970230384e-06
+  },
+  "vit.encoder.layer.7.attention.attention.key": {
+    "trace": 0.2040739394724369,
+    "parameters": 147456,
+    "S_i": 1.3839649758059143e-06
+  },
+  "vit.encoder.layer.3.output.dense": {
+    "trace": 0.7103040190413594,
+    "parameters": 589824,
+    "S_i": 1.2042643551997874e-06
+  },
+  "vit.encoder.layer.4.attention.attention.query": {
+    "trace": 0.1612024127971381,
+    "parameters": 147456,
+    "S_i": 1.0932238281055916e-06
+  },
+  "vit.encoder.layer.7.output.dense": {
+    "trace": 0.5875961622223258,
+    "parameters": 589824,
+    "S_i": 9.962228770316667e-07
+  },
+  "vit.encoder.layer.7.attention.attention.query": {
+    "trace": 0.1449111900292337,
+    "parameters": 147456,
+    "S_i": 9.827419028675245e-07
+  },
+  "vit.encoder.layer.0.attention.attention.query": {
+    "trace": 0.138413293287158,
+    "parameters": 147456,
+    "S_i": 9.386752203176406e-07
+  },
+  "vit.encoder.layer.5.output.dense": {
+    "trace": 0.5133533128537238,
+    "parameters": 589824,
+    "S_i": 8.703499905967268e-07
+  },
+  "vit.encoder.layer.5.attention.attention.key": {
+    "trace": 0.097222157754004,
+    "parameters": 147456,
+    "S_i": 6.593299543864204e-07
+  },
+  "vit.encoder.layer.4.attention.attention.key": {
+    "trace": 0.03984819399192929,
+    "parameters": 147456,
+    "S_i": 2.702378607308573e-07
+  },
+  "vit.encoder.layer.5.attention.attention.query": {
+    "trace": -0.008425365900620818,
+    "parameters": 147456,
+    "S_i": 5.713816935642373e-08
+  },
+  "vit.encoder.layer.7.intermediate.dense": {
+    "trace": 0.00875949114561081,
+    "parameters": 589824,
+    "S_i": 1.4851025298412424e-08
+  }
+}
