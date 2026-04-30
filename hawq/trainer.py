@@ -54,11 +54,27 @@ class HAWQTrainer:
 
     def build_optimizer(self):
         """
-        Build AdamW optimizer using only currently trainable parameters.
+        Builds AdamW optimizer with differential learning rates.
+        Accelerates the convergence of the randomly initialized head.
         """
-        params = [p for p in self.model.parameters() if p.requires_grad]
-        return torch.optim.AdamW(params, lr=self.lr, weight_decay=self.weight_decay)
-
+        head_params = []
+        body_params = []
+        
+        for name, p in self.model.named_parameters():
+            if not p.requires_grad:
+                continue
+            if "classifier" in name.lower() or "head" in name.lower():
+                head_params.append(p)
+            else:
+                body_params.append(p)
+                
+        #the head needs to travel far, the body only needs to adapt to the blur
+        optim_groups = [
+            {"params": body_params, "lr": self.lr},          
+            {"params": head_params, "lr": self.lr * 100.0}   
+        ]
+        
+        return torch.optim.AdamW(optim_groups, weight_decay=self.weight_decay)
     def forward_loss(self, batch):
         """
         Runs one forward pass and compute loss.
@@ -188,14 +204,18 @@ class HAWQTrainer:
         named_modules = dict(self.model.named_modules())
 
         for phase_idx, (block_name, block_info) in enumerate(schedule, start=1):
-            weight_bits = block_info["target_bits"]
 
-            print(f"\n[Phase {phase_idx}] Quantize + fine-tune: {block_name} at {weight_bits}-bit")
+            w_bits = allocated_bits[block_name]["weight_bits"]
+            a_bits = allocated_bits[block_name]["act_bits"]
 
-            self.enable_block_quantization(block_name, weight_bits)
+            print(f"\n[Phase {phase_idx}] Quantize + fine-tune: {block_name} (W{w_bits}A{a_bits})")
+
+            self.enable_block_quantization(block_name, weight_bits=w_bits, act_bits=a_bits)
 
             self.freeze_all()
 
+            self.unfreeze_norm_layers()
+            
             #always unfreezes current block
             self.unfreeze_module(named_modules[block_name])
 
@@ -258,3 +278,13 @@ class HAWQTrainer:
                 f"train_loss={train_loss:.6f} | "
                 + " ".join(f"{k}={v:.6f}" for k, v in metrics.items())
             )
+
+    def unfreeze_norm_layers(self):
+        """
+        Unfreeze all normalization layers (LayerNorm in ViTs).
+        This is mathematically critical to absorb quantization variance shift.
+        """
+        for module in self.model.modules():
+            if isinstance(module, (nn.LayerNorm, nn.BatchNorm1d, nn.BatchNorm2d, nn.BatchNorm3d)):
+                for p in module.parameters():
+                    p.requires_grad_(True)
