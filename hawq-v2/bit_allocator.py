@@ -35,9 +35,6 @@ class HAWQv2BitAllocator:
             sorted(candidate_weight_bits, reverse=True)
         )
 
-    # ------------------------------------------------------------------ #
-    # Baselines                                                          #
-    # ------------------------------------------------------------------ #
     def allocate_uniform(self, layer_sensitivities, bit_width):
         """Same bit-width everywhere - the uniform PTQ baseline."""
         return {name: int(bit_width) for name in layer_sensitivities}
@@ -58,87 +55,4 @@ class HAWQv2BitAllocator:
             frac = rank / max(n - 1, 1)
             bin_idx = min(int(frac * k), k - 1)
             allocated[name] = bits_desc[bin_idx]
-        return allocated
-
-    # ------------------------------------------------------------------ #
-    # Slider / budget mode                                               #
-    # ------------------------------------------------------------------ #
-    def allocate_by_budget(self, layer_sensitivities, target_avg_bits):
-        """
-        Pass-based parameter-weighted budget allocation.
-
-        Strategy
-        --------
-        Walk the candidate bit-widths in *passes*:
-            pass 0: promote layers from level 0 (min) to level 1
-            pass 1: promote layers from level 1 to level 2
-            ...
-        Within each pass, promote in sensitivity order (highest first).
-
-        Why passes (instead of "promote one layer all the way up")
-        ----------------------------------------------------------
-        Depth-first promotion (one layer all the way up before touching the
-        next) blows up at intermediate budgets. e.g. with candidates
-        {6, 8, 10} and budget 8 the depth-first version ends up with the
-        top half of layers at 10 and the bottom half at 6 - the half stuck
-        at 6 hurts more than the half at 10 helps, and the result loses
-        to Uniform-8 (everyone at 8). The breadth-first pass-based version
-        gracefully reduces to "everyone at 8" at budget 8, and only starts
-        promoting to 10 once budget exceeds 8.
-
-        Round-to-nearest at the boundary: if the next promotion overshoots
-        the target by less than the current undershoot, accept it.
-
-        Returns a dict layer_name -> bit_width.
-        """
-        bits_asc = sorted(self.candidate_weight_bits)
-        min_bit, max_bit = bits_asc[0], bits_asc[-1]
-
-        # Trivial edge cases.
-        if target_avg_bits >= max_bit:
-            return {name: max_bit for name in layer_sensitivities}
-        if target_avg_bits <= min_bit:
-            return {name: min_bit for name in layer_sensitivities}
-
-        # Order layers by sensitivity (highest first - they get bumped first).
-        sorted_layers = sorted(
-            layer_sensitivities.items(),
-            key=lambda x: x[1]["S_i"],
-            reverse=True,
-        )
-        layer_names = [name for name, _ in sorted_layers]
-        params = {name: meta["parameters"] for name, meta in sorted_layers}
-        total_params = sum(params.values())
-
-        allocated = {name: min_bit for name in layer_names}
-
-        def weighted_avg(assignment):
-            return (
-                sum(assignment[n] * params[n] for n in layer_names)
-                / total_params
-            )
-
-        # Walk one pass per adjacent pair of bit-widths.
-        for level_idx in range(len(bits_asc) - 1):
-            cur_bit = bits_asc[level_idx]
-            next_bit = bits_asc[level_idx + 1]
-
-            for name in layer_names:
-                if allocated[name] != cur_bit:
-                    continue  # already promoted in an earlier pass
-
-                tentative = dict(allocated)
-                tentative[name] = next_bit
-                new_avg = weighted_avg(tentative)
-                cur_avg = weighted_avg(allocated)
-
-                if new_avg <= target_avg_bits:
-                    allocated = tentative
-                    continue
-
-                # Crossing the target. Pick whichever side is closer.
-                if abs(new_avg - target_avg_bits) < abs(cur_avg - target_avg_bits):
-                    allocated = tentative
-                return allocated
-
         return allocated
